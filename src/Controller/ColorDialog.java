@@ -117,10 +117,6 @@ public class ColorDialog extends JDialog implements ActionListener, ChangeListen
 		p.add(p4);
 		p.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-		// tweek sizes of panels to make the dialog look nice
-
-		Dimension d1 = p3.getPreferredSize();
-
 		this.setContentPane(p);
 		this.pack();
 	}
