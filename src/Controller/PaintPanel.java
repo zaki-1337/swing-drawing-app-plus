@@ -36,7 +36,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
 	private final int TRIANGLE_TOOL = 9;
 	private final int DELETE_TOOL = 13;
 
-	private TextDialog td;
+	private TextDialogController td;
 	private ImageDialogController imgd;
 	private BasicStroke stroke = new BasicStroke((float) 2);
 	BufferedImage canvas;
@@ -95,7 +95,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
 		this.grouped = 1;
 		this.preview = new Stack<MyElement>();
 		this.transparent = true;
-		td = new TextDialog(frame);
+		td = new TextDialogController(frame);
 		imgd = new ImageDialogController(frame);
 	}
 
@@ -151,46 +151,48 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
 	}
 
 	public void undo() {
-		if (!operations.isEmpty()) {
-			OperationWrapper lastOperation = operations.pop();
-			if (lastOperation.getType() == OperationType.DRAW) {
-				if (shapes.size() > 0 && shapes.peek().getGroup() == 0) {
+		if (operations.isEmpty()) {
+			return;
+		}
+
+		OperationWrapper lastOperation = operations.pop();
+		if (lastOperation.getType() == OperationType.DRAW) {
+			if (shapes.size() > 0 && shapes.peek().getGroup() == 0) {
+				removed.push(shapes.pop());
+				repaint();
+			} else if (shapes.size() > 0 && shapes.peek().getGroup() != 0) {
+				MyElement lastRemoved = shapes.pop();
+				removed.push(lastRemoved);
+
+				while (!shapes.isEmpty() && shapes.peek().getGroup() == lastRemoved.getGroup()) {
 					removed.push(shapes.pop());
 					repaint();
-				} else if (shapes.size() > 0 && shapes.peek().getGroup() != 0) {
-					MyElement lastRemoved = shapes.pop();
-					removed.push(lastRemoved);
-
-					while (!shapes.isEmpty() && shapes.peek().getGroup() == lastRemoved.getGroup()) {
-						removed.push(shapes.pop());
-						repaint();
-					}
-				}
-			} else if (lastOperation.getType() == OperationType.FILL) {
-				ClosedShape temp = (ClosedShape) lastOperation.getShape();
-				temp.fill(lastOperation.getFromColor());
-			} else if (lastOperation.getType() == OperationType.MOVE) {
-				MoveableElement toMove = (MoveableElement) lastOperation.getShape();
-
-				if (toMove.getGroup() == 0) {
-					MoveableElement temp = (MoveableElement) lastOperation.getShape();
-					temp.displace(-lastOperation.getDeltaX(), -lastOperation.getDeltaY());
-				} else {
-					Iterator<MyElement> itr = shapes.iterator();
-
-					while (itr.hasNext()) {
-						MoveableElement nextShape = (MoveableElement) itr.next();
-						if (nextShape.getGroup() == toMove.getGroup()) {
-							nextShape.displace(-lastOperation.getDeltaX(), -lastOperation.getDeltaY());
-						}
-
-					}
 				}
 			}
+		} else if (lastOperation.getType() == OperationType.FILL) {
+			ClosedShape temp = (ClosedShape) lastOperation.getShape();
+			temp.fill(lastOperation.getFromColor());
+		} else if (lastOperation.getType() == OperationType.MOVE) {
+			MoveableElement toMove = (MoveableElement) lastOperation.getShape();
 
-			undoneOperations.add(lastOperation);
-			repaint();
+			if (toMove.getGroup() == 0) {
+				MoveableElement temp = (MoveableElement) lastOperation.getShape();
+				temp.displace(-lastOperation.getDeltaX(), -lastOperation.getDeltaY());
+			} else {
+				Iterator<MyElement> itr = shapes.iterator();
+
+				while (itr.hasNext()) {
+					MoveableElement nextShape = (MoveableElement) itr.next();
+					if (nextShape.getGroup() == toMove.getGroup()) {
+						nextShape.displace(-lastOperation.getDeltaX(), -lastOperation.getDeltaY());
+					}
+
+				}
+			}
 		}
+
+		undoneOperations.add(lastOperation);
+		repaint();
 	}
 
 	public void redo() {
@@ -386,6 +388,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
+		printCoords(e);
 		// not using
 	}
 
@@ -572,7 +575,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
 			}
 		} else if (activeTool == TEXT_TOOL) {
 			int i = td.showCustomDialog(frame);
-			if (i == TextDialog.APPLY_OPTION) {
+			if (i == TextDialogController.APPLY_OPTION) {
 				shapes.push(new Text(x1, y1, td.getInputSize(), td.getFont(), primary, stroke, td.getText()));
 				operations.push(new OperationWrapper(OperationType.DRAW));
 			}

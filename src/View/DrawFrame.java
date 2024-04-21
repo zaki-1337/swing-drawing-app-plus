@@ -12,9 +12,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
 import Controller.ColorChooserController;
-import Controller.CoordinateBar;
+// import Controller.CoordinateBar;
 import Controller.PaintPanel;
-import Controller.ToolBar;
+import Controller.ToolBarController;
 
 public class DrawFrame extends JFrame {
 
@@ -46,7 +46,7 @@ public class DrawFrame extends JFrame {
 		contentPane.setLayout(null);
 
 		// create a tool bar
-		toolBar = (new ToolBar(this)).getToolBar();
+		toolBar = (new ToolBarController(this)).getToolBar();
 
 		// create coordinate bar at the bottom
 		coordinateBar = new CoordinateBar();
