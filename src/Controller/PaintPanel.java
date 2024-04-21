@@ -388,6 +388,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
+		printCoords(e);
 		// not using
 	}
 

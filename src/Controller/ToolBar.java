@@ -321,7 +321,6 @@ public class ToolBar implements ActionListener {
 			newDimensions = new Dimension(ImageIO.read(f).getWidth(), ImageIO.read(f).getHeight());
 			setDimensions(newDimensions.width, newDimensions.height);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
